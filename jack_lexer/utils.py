@@ -5,6 +5,8 @@ def convert_symbol(s):
         return "&gt;"
     if s == "&":
         return "&amp;"
+    if s == '"':
+        return "&quot;"
     return s
 
 def write_xml(tokens, path):
