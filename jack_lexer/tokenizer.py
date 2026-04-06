@@ -36,7 +36,7 @@ class JackTokenizer:
 
             if c == '"':
                 j = i + 1
-                while self.code[j] != '"':
+                while j < len(self.code) and self.code[j] != '"':
                     j += 1
                 val = self.code[i+1:j]
                 self.tokens.append(Token("stringConstant", val))
@@ -71,7 +71,9 @@ class JackTokenizer:
                 i = j
                 continue
 
-            i += 1
+            else:
+                i += 1
 
     def get_tokens(self):
         return self.tokens
+    
