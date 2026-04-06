@@ -7,7 +7,7 @@ KEYWORDS = {
     "let","do","if","else","while","return"
 }
 
-SYMBOLS = set(" \{}()[].,;+-*/&|<>=~")
+SYMBOLS = set("{}()[].,;+-*/&|<>=~")
 
 class Token:
     def __init__(self, t, v):
