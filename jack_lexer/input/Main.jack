@@ -1,7 +1,6 @@
 class Main {
-   function void main() {
-      var int i;
-      let i = 2;
-      do Output.printString("leticia testando 123 testando let let");
-      return;
-   }
+    function void main() {
+        do SquareGame.new().run();
+        return;
+    }
+}

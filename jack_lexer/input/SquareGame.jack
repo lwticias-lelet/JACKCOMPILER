@@ -1,0 +1,38 @@
+class SquareGame {
+    field Square square;
+    field int direction;
+
+    constructor SquareGame new() {
+        let square = Square.new(0, 0, 30);
+        let direction = 0;
+        return this;
+    }
+
+    method void run() {
+        var char key;
+
+        while (true) {
+            let key = Keyboard.keyPressed();
+
+            if (key = 81) {
+                return;
+            }
+
+            if (key = 131) {
+                do square.moveLeft();
+            }
+
+            if (key = 132) {
+                do square.moveRight();
+            }
+
+            if (key = 133) {
+                do square.moveUp();
+            }
+
+            if (key = 134) {
+                do square.moveDown();
+            }
+        }
+    }
+}

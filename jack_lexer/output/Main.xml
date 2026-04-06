@@ -8,24 +8,19 @@
 <symbol> ( </symbol>
 <symbol> ) </symbol>
 <symbol> { </symbol>
-<keyword> var </keyword>
-<keyword> int </keyword>
-<identifier> i </identifier>
-<symbol> ; </symbol>
-<keyword> let </keyword>
-<identifier> i </identifier>
-<symbol> = </symbol>
-<integerConstant> 2 </integerConstant>
-<symbol> ; </symbol>
 <keyword> do </keyword>
-<identifier> Output </identifier>
+<identifier> SquareGame </identifier>
 <symbol> . </symbol>
-<identifier> printString </identifier>
+<identifier> new </identifier>
 <symbol> ( </symbol>
-<stringConstant> leticia testando 123 testando let let </stringConstant>
+<symbol> ) </symbol>
+<symbol> . </symbol>
+<identifier> run </identifier>
+<symbol> ( </symbol>
 <symbol> ) </symbol>
 <symbol> ; </symbol>
 <keyword> return </keyword>
 <symbol> ; </symbol>
+<symbol> } </symbol>
 <symbol> } </symbol>
 </tokens>
