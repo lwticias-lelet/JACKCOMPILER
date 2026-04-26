@@ -14,3 +14,71 @@ class Token:
         self.type = t
         self.value = v
 
+class JackTokenizer:
+    def __init__(self, code):
+        self.code = self.clean(code)
+        self.tokens = []
+        self.tokenize()
+
+    def clean(self, code):
+        code = re.sub(r"//.*", "", code)
+        code = re.sub(r"/\*.*?\*/", "", code, flags=re.DOTALL)
+        return code
+
+    def tokenize(self):
+        i = 0
+        n = len(self.code)
+
+        while i < n:
+            c = self.code[i]
+
+            # espaços
+            if c.isspace():
+                i += 1
+                continue
+
+            # string
+            if c == '"':
+                j = i + 1
+                while j < n and self.code[j] != '"':
+                    j += 1
+                val = self.code[i+1:j]
+                self.tokens.append(Token("stringConstant", val))
+                i = j + 1
+                continue
+
+            # símbolo
+            if c in SYMBOLS:
+                self.tokens.append(Token("symbol", c))
+                i += 1
+                continue
+
+            # número
+            if c.isdigit():
+                j = i
+                while j < n and self.code[j].isdigit():
+                    j += 1
+                val = self.code[i:j]
+                self.tokens.append(Token("integerConstant", val))
+                i = j
+                continue
+
+            # identificador ou keyword
+            if c.isalpha() or c == "_":
+                j = i
+                while j < n and (self.code[j].isalnum() or self.code[j] == "_"):
+                    j += 1
+                val = self.code[i:j]
+
+                if val in KEYWORDS:
+                    self.tokens.append(Token("keyword", val))
+                else:
+                    self.tokens.append(Token("identifier", val))
+
+                i = j
+                continue
+
+            i += 1
+
+    def get_tokens(self):
+        return self.tokens
