@@ -1,23 +1,18 @@
-def convert_symbol(s):
-    if s == "<":
-        return "&lt;"
-    if s == ">":
-        return "&gt;"
-    if s == "&":
-        return "&amp;"
-    if s == '"':
-        return "&quot;"
-    return s
+def escape_xml(s):
+    return (
+        s.replace("&", "&amp;")
+         .replace("<", "&lt;")
+         .replace(">", "&gt;")
+         .replace('"', "&quot;")
+    )
+
 
 def write_xml(tokens, path):
     with open(path, "w") as f:
         f.write("<tokens>\n")
 
         for t in tokens:
-            val = t.value
-            if t.type == "symbol":
-                val = convert_symbol(val)
-
-            f.write(f"<{t.type}> {val} </{t.type}>\n")
+            val = escape_xml(t.value)
+            f.write(f"  <{t.type}> {val} </{t.type}>\n")
 
         f.write("</tokens>\n")

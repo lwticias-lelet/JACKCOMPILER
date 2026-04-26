@@ -3,119 +3,156 @@ class Parser:
         self.tokens = tokens
         self.i = 0
         self.output = []
+        self.indent = 0
+
+    # =============================
+    # UTIL
+    # =============================
 
     def peek(self):
-        return self.tokens[self.i]
+        if self.i < len(self.tokens):
+            return self.tokens[self.i]
+        return None
 
     def advance(self):
-        token = self.tokens[self.i]
+        tok = self.tokens[self.i]
         self.i += 1
-        return token
-
-    def eat(self, ttype=None, val=None):
-        token = self.advance()
-        if ttype and token.type != ttype:
-            raise Exception("Erro de tipo")
-        if val and token.value != val:
-            raise Exception("Erro de valor")
-        self.write_token(token)
+        return tok
 
     def write(self, text):
-        self.output.append(text)
+        self.output.append("  " * self.indent + text)
+
+    def open_tag(self, tag):
+        self.write(f"<{tag}>")
+        self.indent += 1
+
+    def close_tag(self, tag):
+        self.indent -= 1
+        self.write(f"</{tag}>")
 
     def write_token(self, token):
         val = token.value
-        if val == "<":
-            val = "&lt;"
-        elif val == ">":
-            val = "&gt;"
-        elif val == "&":
-            val = "&amp;"
-        elif val == '"':
-            val = "&quot;"
+        if val == "<": val = "&lt;"
+        elif val == ">": val = "&gt;"
+        elif val == "&": val = "&amp;"
+        elif val == '"': val = "&quot;"
         self.write(f"<{token.type}> {val} </{token.type}>")
+
+    # =============================
+    # ENTRY
+    # =============================
 
     def parse(self):
         self.compile_class()
         return "\n".join(self.output)
 
-    def compile_class(self):
-        self.write("<class>")
-        self.eat("keyword", "class")
-        self.eat("identifier")
-        self.eat("symbol", "{")
+    # =============================
+    # CLASS
+    # =============================
 
-        while self.peek().value in ["static", "field"]:
+    def compile_class(self):
+        self.open_tag("class")
+
+        self.write_token(self.advance())
+        self.write_token(self.advance())
+        self.write_token(self.advance())
+
+        while self.peek() and self.peek().value in ["static", "field"]:
             self.compile_class_var_dec()
 
-        while self.peek().value in ["constructor", "function", "method"]:
+        while self.peek() and self.peek().value in ["constructor", "function", "method"]:
             self.compile_subroutine()
 
-        self.eat("symbol", "}")
-        self.write("</class>")
+        self.write_token(self.advance())
+
+        self.close_tag("class")
 
     def compile_class_var_dec(self):
-        self.write("<classVarDec>")
-        self.eat("keyword")
-        self.eat()
-        self.eat("identifier")
+        self.open_tag("classVarDec")
 
-        while self.peek().value == ",":
-            self.eat("symbol", ",")
-            self.eat("identifier")
+        self.write_token(self.advance())
+        self.write_token(self.advance())
+        self.write_token(self.advance())
 
-        self.eat("symbol", ";")
-        self.write("</classVarDec>")
+        while self.peek() and self.peek().value == ",":
+            self.write_token(self.advance())
+            self.write_token(self.advance())
+
+        self.write_token(self.advance())
+
+        self.close_tag("classVarDec")
+
+    # =============================
+    # SUBROUTINE
+    # =============================
 
     def compile_subroutine(self):
-        self.write("<subroutineDec>")
-        self.eat("keyword")
-        self.eat()
-        self.eat("identifier")
-        self.eat("symbol", "(")
+        self.open_tag("subroutineDec")
+
+        self.write_token(self.advance())
+        self.write_token(self.advance())
+        self.write_token(self.advance())
+        self.write_token(self.advance())
+
         self.compile_parameter_list()
-        self.eat("symbol", ")")
+
+        self.write_token(self.advance())
+
         self.compile_subroutine_body()
-        self.write("</subroutineDec>")
+
+        self.close_tag("subroutineDec")
 
     def compile_parameter_list(self):
-        self.write("<parameterList>")
+        self.open_tag("parameterList")
+
         if self.peek().value != ")":
-            self.eat()
-            self.eat("identifier")
+            self.write_token(self.advance())
+            self.write_token(self.advance())
+
             while self.peek().value == ",":
-                self.eat("symbol", ",")
-                self.eat()
-                self.eat("identifier")
-        self.write("</parameterList>")
+                self.write_token(self.advance())
+                self.write_token(self.advance())
+                self.write_token(self.advance())
+
+        self.close_tag("parameterList")
 
     def compile_subroutine_body(self):
-        self.write("<subroutineBody>")
-        self.eat("symbol", "{")
+        self.open_tag("subroutineBody")
+
+        self.write_token(self.advance())
 
         while self.peek().value == "var":
             self.compile_var_dec()
 
         self.compile_statements()
-        self.eat("symbol", "}")
-        self.write("</subroutineBody>")
+
+        self.write_token(self.advance())
+
+        self.close_tag("subroutineBody")
 
     def compile_var_dec(self):
-        self.write("<varDec>")
-        self.eat("keyword", "var")
-        self.eat()
-        self.eat("identifier")
+        self.open_tag("varDec")
+
+        self.write_token(self.advance())
+        self.write_token(self.advance())
+        self.write_token(self.advance())
 
         while self.peek().value == ",":
-            self.eat("symbol", ",")
-            self.eat("identifier")
+            self.write_token(self.advance())
+            self.write_token(self.advance())
 
-        self.eat("symbol", ";")
-        self.write("</varDec>")
+        self.write_token(self.advance())
+
+        self.close_tag("varDec")
+
+    # =============================
+    # STATEMENTS
+    # =============================
 
     def compile_statements(self):
-        self.write("<statements>")
-        while self.peek().value in ["let", "if", "while", "do", "return"]:
+        self.open_tag("statements")
+
+        while self.peek() and self.peek().value in ["let", "if", "while", "do", "return"]:
             if self.peek().value == "let":
                 self.compile_let()
             elif self.peek().value == "if":
@@ -126,132 +163,163 @@ class Parser:
                 self.compile_do()
             elif self.peek().value == "return":
                 self.compile_return()
-        self.write("</statements>")
+
+        self.close_tag("statements")
 
     def compile_let(self):
-        self.write("<letStatement>")
-        self.eat("keyword", "let")
-        self.eat("identifier")
+        self.open_tag("letStatement")
+
+        self.write_token(self.advance())
+        self.write_token(self.advance())
 
         if self.peek().value == "[":
-            self.eat("symbol", "[")
+            self.write_token(self.advance())
             self.compile_expression()
-            self.eat("symbol", "]")
+            self.write_token(self.advance())
 
-        self.eat("symbol", "=")
+        self.write_token(self.advance())
+
         self.compile_expression()
-        self.eat("symbol", ";")
-        self.write("</letStatement>")
+
+        self.write_token(self.advance())
+
+        self.close_tag("letStatement")
 
     def compile_if(self):
-        self.write("<ifStatement>")
-        self.eat("keyword", "if")
-        self.eat("symbol", "(")
+        self.open_tag("ifStatement")
+
+        self.write_token(self.advance())
+        self.write_token(self.advance())
+
         self.compile_expression()
-        self.eat("symbol", ")")
-        self.eat("symbol", "{")
+
+        self.write_token(self.advance())
+        self.write_token(self.advance())
+
         self.compile_statements()
-        self.eat("symbol", "}")
 
-        if self.peek().value == "else":
-            self.eat("keyword", "else")
-            self.eat("symbol", "{")
+        self.write_token(self.advance())
+
+        if self.peek() and self.peek().value == "else":
+            self.write_token(self.advance())
+            self.write_token(self.advance())
             self.compile_statements()
-            self.eat("symbol", "}")
+            self.write_token(self.advance())
 
-        self.write("</ifStatement>")
+        self.close_tag("ifStatement")
 
     def compile_while(self):
-        self.write("<whileStatement>")
-        self.eat("keyword", "while")
-        self.eat("symbol", "(")
+        self.open_tag("whileStatement")
+
+        self.write_token(self.advance())
+        self.write_token(self.advance())
+
         self.compile_expression()
-        self.eat("symbol", ")")
-        self.eat("symbol", "{")
+
+        self.write_token(self.advance())
+        self.write_token(self.advance())
+
         self.compile_statements()
-        self.eat("symbol", "}")
-        self.write("</whileStatement>")
+
+        self.write_token(self.advance())
+
+        self.close_tag("whileStatement")
 
     def compile_do(self):
-        self.write("<doStatement>")
-        self.eat("keyword", "do")
+        self.open_tag("doStatement")
+
+        self.write_token(self.advance())
+
         self.compile_subroutine_call()
-        self.eat("symbol", ";")
-        self.write("</doStatement>")
+
+        self.write_token(self.advance())
+
+        self.close_tag("doStatement")
 
     def compile_return(self):
-        self.write("<returnStatement>")
-        self.eat("keyword", "return")
+        self.open_tag("returnStatement")
+
+        self.write_token(self.advance())
 
         if self.peek().value != ";":
             self.compile_expression()
 
-        self.eat("symbol", ";")
-        self.write("</returnStatement>")
+        self.write_token(self.advance())
+
+        self.close_tag("returnStatement")
+
+    # =============================
+    # EXPRESSIONS
+    # =============================
 
     def compile_expression(self):
-        self.write("<expression>")
+        self.open_tag("expression")
+
         self.compile_term()
 
-        while self.peek().value in ["+", "-", "*", "/", "&", "|", "<", ">", "="]:
-            self.eat("symbol")
+        while self.peek() and self.peek().value in ['+', '-', '*', '/', '&', '|', '<', '>', '=']:
+            self.write_token(self.advance())
             self.compile_term()
 
-        self.write("</expression>")
+        self.close_tag("expression")
 
     def compile_term(self):
-        self.write("<term>")
-        token = self.peek()
+        self.open_tag("term")
 
-        if token.type == "integerConstant":
-            self.eat("integerConstant")
+        token = self.advance()
 
-        elif token.type == "stringConstant":
-            self.eat("stringConstant")
-
-        elif token.type == "keyword":
-            self.eat("keyword")
-
-        elif token.value == "(":
-            self.eat("symbol", "(")
-            self.compile_expression()
-            self.eat("symbol", ")")
-
-        elif token.value in ["-", "~"]:
-            self.eat("symbol")
-            self.compile_term()
+        if token.type in ["integerConstant", "stringConstant", "keyword"]:
+            self.write_token(token)
 
         elif token.type == "identifier":
-            self.eat("identifier")
+            self.write_token(token)
 
-            if self.peek().value == "[":
-                self.eat("symbol", "[")
+            if self.peek() and self.peek().value == "[":
+                self.write_token(self.advance())
                 self.compile_expression()
-                self.eat("symbol", "]")
+                self.write_token(self.advance())
 
-            elif self.peek().value in ["(", "."]:
-                self.compile_subroutine_call_rest()
+            elif self.peek() and self.peek().value in ["(", "."]:
+                if self.peek().value == ".":
+                    self.write_token(self.advance())
+                    self.write_token(self.advance())
 
-        self.write("</term>")
+                self.write_token(self.advance())
+                self.compile_expression_list()
+                self.write_token(self.advance())
 
-    def compile_subroutine_call(self):
-        self.eat("identifier")
-        self.compile_subroutine_call_rest()
+        elif token.value == "(":
+            self.write_token(token)
+            self.compile_expression()
+            self.write_token(self.advance())
 
-    def compile_subroutine_call_rest(self):
-        if self.peek().value == ".":
-            self.eat("symbol", ".")
-            self.eat("identifier")
+        elif token.value in ["-", "~"]:
+            self.write_token(token)
+            self.compile_term()
 
-        self.eat("symbol", "(")
-        self.compile_expression_list()
-        self.eat("symbol", ")")
+        self.close_tag("term")
 
     def compile_expression_list(self):
-        self.write("<expressionList>")
-        if self.peek().value != ")":
+        self.open_tag("expressionList")
+
+        if self.peek() and self.peek().value != ")":
             self.compile_expression()
+
             while self.peek().value == ",":
-                self.eat("symbol", ",")
+                self.write_token(self.advance())
                 self.compile_expression()
-        self.write("</expressionList>")
+
+        self.close_tag("expressionList")
+
+    def compile_subroutine_call(self):
+        self.write_token(self.advance())
+
+        if self.peek().value == ".":
+            self.write_token(self.advance())
+            self.write_token(self.advance())
+
+        self.write_token(self.advance())
+
+        self.compile_expression_list()
+
+        self.write_token(self.advance())

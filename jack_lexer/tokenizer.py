@@ -14,6 +14,7 @@ class Token:
         self.type = t
         self.value = v
 
+
 class JackTokenizer:
     def __init__(self, code):
         self.code = self.clean(code)
@@ -21,9 +22,20 @@ class JackTokenizer:
         self.tokenize()
 
     def clean(self, code):
-        code = re.sub(r"//.*", "", code)
+        # remove comentários de bloco
         code = re.sub(r"/\*.*?\*/", "", code, flags=re.DOTALL)
-        return code
+
+        # remove comentários de linha com segurança
+        lines = code.split("\n")
+        cleaned = []
+
+        for line in lines:
+            if '//' in line:
+                idx = line.find('//')
+                line = line[:idx]
+            cleaned.append(line)
+
+        return "\n".join(cleaned)
 
     def tokenize(self):
         i = 0
@@ -32,28 +44,31 @@ class JackTokenizer:
         while i < n:
             c = self.code[i]
 
-            # espaços
             if c.isspace():
                 i += 1
                 continue
 
-            # string
+            # STRING
             if c == '"':
                 j = i + 1
                 while j < n and self.code[j] != '"':
                     j += 1
+
+                if j >= n:
+                    raise Exception("String não fechada")
+
                 val = self.code[i+1:j]
                 self.tokens.append(Token("stringConstant", val))
                 i = j + 1
                 continue
 
-            # símbolo
+            # SYMBOL
             if c in SYMBOLS:
                 self.tokens.append(Token("symbol", c))
                 i += 1
                 continue
 
-            # número
+            # NUMBER
             if c.isdigit():
                 j = i
                 while j < n and self.code[j].isdigit():
@@ -63,7 +78,7 @@ class JackTokenizer:
                 i = j
                 continue
 
-            # identificador ou keyword
+            # IDENTIFIER / KEYWORD
             if c.isalpha() or c == "_":
                 j = i
                 while j < n and (self.code[j].isalnum() or self.code[j] == "_"):
