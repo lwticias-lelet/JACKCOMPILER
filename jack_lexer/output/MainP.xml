@@ -2,6 +2,12 @@
 <keyword> class </keyword>
 <identifier> Main </identifier>
 <symbol> { </symbol>
+<classVarDec>
+<keyword> static </keyword>
+<keyword> boolean </keyword>
+<identifier> test </identifier>
+<symbol> ; </symbol>
+</classVarDec>
 <subroutineDec>
 <keyword> function </keyword>
 <keyword> void </keyword>
@@ -12,27 +18,27 @@
 <symbol> ) </symbol>
 <subroutineBody>
 <symbol> { </symbol>
-<statements>
-<doStatement>
-<keyword> do </keyword>
+<varDec>
+<keyword> var </keyword>
 <identifier> SquareGame </identifier>
-<symbol> . </symbol>
-<identifier> new </identifier>
-<symbol> ( </symbol>
-<symbol> ) </symbol>
-<symbol> . </symbol>
-<identifier> run </identifier>
-<symbol> ( </symbol>
-<symbol> ) </symbol>
+<identifier> game </identifier>
 <symbol> ; </symbol>
-</doStatement>
-<returnStatement>
-<keyword> return </keyword>
-<symbol> ; </symbol>
-</returnStatement>
+</varDec>
+<statements>
+<letStatement>
+<keyword> let </keyword>
+<identifier> game </identifier>
+<symbol> = </symbol>
+<expression>
+<term>
+<identifier> SquareGame </identifier>
+</term>
+</expression>
+<symbol> . </symbol>
+</letStatement>
 </statements>
-<symbol> } </symbol>
+<identifier> new </identifier>
 </subroutineBody>
 </subroutineDec>
-<symbol> } </symbol>
+<symbol> ( </symbol>
 </class>
