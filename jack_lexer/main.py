@@ -1,6 +1,6 @@
 import os
 from tokenizer import JackTokenizer
-from utils import write_xml
+from parser import Parser
 
 input_dir = "input"
 output_dir = "output"
@@ -18,7 +18,12 @@ for file in os.listdir(input_dir):
         tokenizer = JackTokenizer(code)
         tokens = tokenizer.get_tokens()
 
-        out_name = file.replace(".jack", ".xml")
+        # saída do parser (P.xml)
+        parser = Parser(tokens)
+        xml = parser.parse()
+
+        out_name = file.replace(".jack", "P.xml")
         out_path = os.path.join(output_dir, out_name)
 
-        write_xml(tokens, out_path)
+        with open(out_path, "w") as f:
+            f.write(xml)
