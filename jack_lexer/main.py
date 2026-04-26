@@ -8,7 +8,7 @@ output_dir = "output"
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
 
-for file in os.listdir(input_dir):
+for file in sorted(os.listdir(input_dir)):
     if file.endswith(".jack"):
         path = os.path.join(input_dir, file)
 
@@ -18,7 +18,6 @@ for file in os.listdir(input_dir):
         tokenizer = JackTokenizer(code)
         tokens = tokenizer.get_tokens()
 
-        # saída do parser (P.xml)
         parser = Parser(tokens)
         xml = parser.parse()
 
@@ -26,4 +25,6 @@ for file in os.listdir(input_dir):
         out_path = os.path.join(output_dir, out_name)
 
         with open(out_path, "w") as f:
-            f.write(xml)
+            f.write(xml.strip() + "\n")
+
+        print(f"{file} processado com sucesso ✔")
