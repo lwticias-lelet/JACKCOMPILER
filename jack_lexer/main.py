@@ -1,30 +1,45 @@
 import os
+
 from tokenizer import JackTokenizer
-from parser import Parser
+from compilation_engine import CompilationEngine
 
-input_dir = "input"
-output_dir = "output"
 
-if not os.path.exists(output_dir):
-    os.makedirs(output_dir)
+INPUT_DIR = "input"
+OUTPUT_DIR = "output"
 
-for file in sorted(os.listdir(input_dir)):
-    if file.endswith(".jack"):
-        path = os.path.join(input_dir, file)
+os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-        with open(path, "r") as f:
+
+for file_name in os.listdir(INPUT_DIR):
+
+    if file_name.endswith(".jack"):
+
+        input_path = os.path.join(
+            INPUT_DIR,
+            file_name
+        )
+
+        with open(input_path, "r") as f:
             code = f.read()
 
         tokenizer = JackTokenizer(code)
-        tokens = tokenizer.get_tokens()
 
-        parser = Parser(tokens)
-        xml = parser.parse()
+        engine = CompilationEngine(
+            tokenizer.get_tokens()
+        )
 
-        out_name = file.replace(".jack", "P.xml")
-        out_path = os.path.join(output_dir, out_name)
+        engine.compile_class()
 
-        with open(out_path, "w") as f:
-            f.write(xml.strip() + "\n")
+        output_name = file_name.replace(
+            ".jack",
+            ".vm"
+        )
 
-        print(f"{file} processado com sucesso ✔")
+        output_path = os.path.join(
+            OUTPUT_DIR,
+            output_name
+        )
+
+        engine.vm.save(output_path)
+
+        print(f"{file_name} compilado ✔")
