@@ -1,18 +1,15 @@
-def escape_xml(s):
-    return (
-        s.replace("&", "&amp;")
-         .replace("<", "&lt;")
-         .replace(">", "&gt;")
-         .replace('"', "&quot;")
-    )
+def convert_symbol(s):
 
+    if s == "<":
+        return "&lt;"
 
-def write_xml(tokens, path):
-    with open(path, "w") as f:
-        f.write("<tokens>\n")
+    if s == ">":
+        return "&gt;"
 
-        for t in tokens:
-            val = escape_xml(t.value)
-            f.write(f"  <{t.type}> {val} </{t.type}>\n")
+    if s == "&":
+        return "&amp;"
 
-        f.write("</tokens>\n")
+    if s == '"':
+        return "&quot;"
+
+    return s

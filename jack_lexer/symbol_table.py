@@ -19,20 +19,14 @@ class SymbolTable:
         self.counts["arg"] = 0
         self.counts["var"] = 0
 
-    def define(self, name, type_name, kind):
+    def define(self, name, type_, kind):
 
         index = self.counts[kind]
 
-        entry = {
-            "type": type_name,
-            "kind": kind,
-            "index": index
-        }
-
-        if kind in ("static", "field"):
-            self.class_scope[name] = entry
+        if kind in ["static", "field"]:
+            self.class_scope[name] = (type_, kind, index)
         else:
-            self.subroutine_scope[name] = entry
+            self.subroutine_scope[name] = (type_, kind, index)
 
         self.counts[kind] += 1
 
@@ -42,29 +36,29 @@ class SymbolTable:
     def kind_of(self, name):
 
         if name in self.subroutine_scope:
-            return self.subroutine_scope[name]["kind"]
+            return self.subroutine_scope[name][1]
 
         if name in self.class_scope:
-            return self.class_scope[name]["kind"]
+            return self.class_scope[name][1]
 
         return None
 
     def type_of(self, name):
 
         if name in self.subroutine_scope:
-            return self.subroutine_scope[name]["type"]
+            return self.subroutine_scope[name][0]
 
         if name in self.class_scope:
-            return self.class_scope[name]["type"]
+            return self.class_scope[name][0]
 
         return None
 
     def index_of(self, name):
 
         if name in self.subroutine_scope:
-            return self.subroutine_scope[name]["index"]
+            return self.subroutine_scope[name][2]
 
         if name in self.class_scope:
-            return self.class_scope[name]["index"]
+            return self.class_scope[name][2]
 
         return None

@@ -12,38 +12,45 @@ SYMBOLS = set("{}()[].,;+-*/&|<>=~")
 
 
 class Token:
-    def __init__(self, token_type, value):
-        self.type = token_type
-        self.value = value
+    def __init__(self, t, v):
+        self.type = t
+        self.value = v
 
 
 class JackTokenizer:
 
     def __init__(self, code):
-        self.code = self.remove_comments(code)
+        self.code = self.clean(code)
         self.tokens = []
-        self.current = 0
         self.tokenize()
 
-    def remove_comments(self, code):
+    def clean(self, code):
+
+        # remove comentários simples
         code = re.sub(r"//.*", "", code)
+
+        # remove comentários multilinha
         code = re.sub(r"/\*.*?\*/", "", code, flags=re.DOTALL)
+
         return code
 
     def tokenize(self):
 
         i = 0
+        n = len(self.code)
 
-        while i < len(self.code):
+        while i < n:
 
             c = self.code[i]
 
+            # espaços
             if c.isspace():
                 i += 1
                 continue
 
-            # STRING
+            # string
             if c == '"':
+
                 j = i + 1
 
                 while self.code[j] != '"':
@@ -51,63 +58,49 @@ class JackTokenizer:
 
                 value = self.code[i + 1:j]
 
-                self.tokens.append(
-                    Token("stringConstant", value)
-                )
+                self.tokens.append(Token("stringConstant", value))
 
                 i = j + 1
                 continue
 
-            # SYMBOL
+            # símbolos
             if c in SYMBOLS:
-                self.tokens.append(
-                    Token("symbol", c)
-                )
-
+                self.tokens.append(Token("symbol", c))
                 i += 1
                 continue
 
-            # INTEGER
+            # números
             if c.isdigit():
 
                 j = i
 
-                while j < len(self.code) and self.code[j].isdigit():
+                while j < n and self.code[j].isdigit():
                     j += 1
 
                 value = self.code[i:j]
 
-                self.tokens.append(
-                    Token("integerConstant", value)
-                )
+                self.tokens.append(Token("integerConstant", value))
 
                 i = j
                 continue
 
-            # IDENTIFIER / KEYWORD
+            # identificadores
             if c.isalpha() or c == "_":
 
                 j = i
 
-                while (
-                    j < len(self.code)
-                    and (
-                        self.code[j].isalnum()
-                        or self.code[j] == "_"
-                    )
+                while j < n and (
+                    self.code[j].isalnum()
+                    or self.code[j] == "_"
                 ):
                     j += 1
 
                 value = self.code[i:j]
 
                 if value in KEYWORDS:
-                    token_type = "keyword"
+                    self.tokens.append(Token("keyword", value))
                 else:
-                    token_type = "identifier"
-
-                self.tokens.append(
-                    Token(token_type, value)
-                )
+                    self.tokens.append(Token("identifier", value))
 
                 i = j
                 continue

@@ -1,60 +1,34 @@
 class VMWriter:
 
-    def __init__(self):
-
-        self.lines = []
+    def __init__(self, path):
+        self.file = open(path, "w")
 
     def write_push(self, segment, index):
-
-        self.lines.append(
-            f"push {segment} {index}"
-        )
+        self.file.write(f"push {segment} {index}\n")
 
     def write_pop(self, segment, index):
-
-        self.lines.append(
-            f"pop {segment} {index}"
-        )
+        self.file.write(f"pop {segment} {index}\n")
 
     def write_arithmetic(self, command):
-
-        self.lines.append(command)
+        self.file.write(f"{command}\n")
 
     def write_label(self, label):
-
-        self.lines.append(
-            f"label {label}"
-        )
+        self.file.write(f"label {label}\n")
 
     def write_goto(self, label):
-
-        self.lines.append(
-            f"goto {label}"
-        )
+        self.file.write(f"goto {label}\n")
 
     def write_if(self, label):
-
-        self.lines.append(
-            f"if-goto {label}"
-        )
+        self.file.write(f"if-goto {label}\n")
 
     def write_call(self, name, n_args):
-
-        self.lines.append(
-            f"call {name} {n_args}"
-        )
+        self.file.write(f"call {name} {n_args}\n")
 
     def write_function(self, name, n_locals):
-
-        self.lines.append(
-            f"function {name} {n_locals}"
-        )
+        self.file.write(f"function {name} {n_locals}\n")
 
     def write_return(self):
+        self.file.write("return\n")
 
-        self.lines.append("return")
-
-    def save(self, path):
-
-        with open(path, "w") as f:
-            f.write("\n".join(self.lines))
+    def close(self):
+        self.file.close()

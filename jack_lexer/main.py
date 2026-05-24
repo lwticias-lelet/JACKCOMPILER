@@ -1,45 +1,54 @@
 import os
+import sys
 
 from tokenizer import JackTokenizer
-from compilation_engine import CompilationEngine
+from parser import Parser
+from code_generator import CodeGenerator
 
 
-INPUT_DIR = "input"
-OUTPUT_DIR = "output"
+def compile_file(path):
+    with open(path, "r") as f:
+        code = f.read()
 
-os.makedirs(OUTPUT_DIR, exist_ok=True)
+    # tokenizer
+    tokenizer = JackTokenizer(code)
+    tokens = tokenizer.get_tokens()
+
+    # parser
+    parser = Parser(tokens)
+
+    # nome do arquivo vm
+    vm_path = path.replace(".jack", ".vm")
+
+    # code generator
+    generator = CodeGenerator(parser, vm_path)
+
+    generator.compile()
+
+    print(f"{os.path.basename(path)} compilado ✔")
 
 
-for file_name in os.listdir(INPUT_DIR):
+def compile_directory(directory):
+    for file in os.listdir(directory):
+        if file.endswith(".jack"):
+            full_path = os.path.join(directory, file)
+            compile_file(full_path)
 
-    if file_name.endswith(".jack"):
 
-        input_path = os.path.join(
-            INPUT_DIR,
-            file_name
-        )
+if __name__ == "__main__":
 
-        with open(input_path, "r") as f:
-            code = f.read()
+    if len(sys.argv) < 2:
+        print("Uso:")
+        print("python main.py input/Square")
+        sys.exit(1)
 
-        tokenizer = JackTokenizer(code)
+    target = sys.argv[1]
 
-        engine = CompilationEngine(
-            tokenizer.get_tokens()
-        )
+    if os.path.isdir(target):
+        compile_directory(target)
 
-        engine.compile_class()
+    elif target.endswith(".jack"):
+        compile_file(target)
 
-        output_name = file_name.replace(
-            ".jack",
-            ".vm"
-        )
-
-        output_path = os.path.join(
-            OUTPUT_DIR,
-            output_name
-        )
-
-        engine.vm.save(output_path)
-
-        print(f"{file_name} compilado ✔")
+    else:
+        print("Entrada inválida")
