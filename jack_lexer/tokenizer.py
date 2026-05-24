@@ -1,47 +1,41 @@
 import re
 
 KEYWORDS = {
-    "class","constructor","function","method",
-    "field","static","var","int","char","boolean",
-    "void","true","false","null","this",
-    "let","do","if","else","while","return"
+    "class", "constructor", "function", "method",
+    "field", "static", "var", "int", "char",
+    "boolean", "void", "true", "false",
+    "null", "this", "let", "do", "if",
+    "else", "while", "return"
 }
 
 SYMBOLS = set("{}()[].,;+-*/&|<>=~")
 
+
 class Token:
-    def __init__(self, t, v):
-        self.type = t
-        self.value = v
+    def __init__(self, token_type, value):
+        self.type = token_type
+        self.value = value
 
 
 class JackTokenizer:
+
     def __init__(self, code):
-        self.code = self.clean(code)
+        self.code = self.remove_comments(code)
         self.tokens = []
+        self.current = 0
         self.tokenize()
 
-    def clean(self, code):
-        # remove comentários de bloco
+    def remove_comments(self, code):
+        code = re.sub(r"//.*", "", code)
         code = re.sub(r"/\*.*?\*/", "", code, flags=re.DOTALL)
-
-        # remove comentários de linha com segurança
-        lines = code.split("\n")
-        cleaned = []
-
-        for line in lines:
-            if '//' in line:
-                idx = line.find('//')
-                line = line[:idx]
-            cleaned.append(line)
-
-        return "\n".join(cleaned)
+        return code
 
     def tokenize(self):
-        i = 0
-        n = len(self.code)
 
-        while i < n:
+        i = 0
+
+        while i < len(self.code):
+
             c = self.code[i]
 
             if c.isspace():
@@ -51,44 +45,69 @@ class JackTokenizer:
             # STRING
             if c == '"':
                 j = i + 1
-                while j < n and self.code[j] != '"':
+
+                while self.code[j] != '"':
                     j += 1
 
-                if j >= n:
-                    raise Exception("String não fechada")
+                value = self.code[i + 1:j]
 
-                val = self.code[i+1:j]
-                self.tokens.append(Token("stringConstant", val))
+                self.tokens.append(
+                    Token("stringConstant", value)
+                )
+
                 i = j + 1
                 continue
 
             # SYMBOL
             if c in SYMBOLS:
-                self.tokens.append(Token("symbol", c))
+                self.tokens.append(
+                    Token("symbol", c)
+                )
+
                 i += 1
                 continue
 
-            # NUMBER
+            # INTEGER
             if c.isdigit():
+
                 j = i
-                while j < n and self.code[j].isdigit():
+
+                while j < len(self.code) and self.code[j].isdigit():
                     j += 1
-                val = self.code[i:j]
-                self.tokens.append(Token("integerConstant", val))
+
+                value = self.code[i:j]
+
+                self.tokens.append(
+                    Token("integerConstant", value)
+                )
+
                 i = j
                 continue
 
             # IDENTIFIER / KEYWORD
             if c.isalpha() or c == "_":
-                j = i
-                while j < n and (self.code[j].isalnum() or self.code[j] == "_"):
-                    j += 1
-                val = self.code[i:j]
 
-                if val in KEYWORDS:
-                    self.tokens.append(Token("keyword", val))
+                j = i
+
+                while (
+                    j < len(self.code)
+                    and (
+                        self.code[j].isalnum()
+                        or self.code[j] == "_"
+                    )
+                ):
+                    j += 1
+
+                value = self.code[i:j]
+
+                if value in KEYWORDS:
+                    token_type = "keyword"
                 else:
-                    self.tokens.append(Token("identifier", val))
+                    token_type = "identifier"
+
+                self.tokens.append(
+                    Token(token_type, value)
+                )
 
                 i = j
                 continue
